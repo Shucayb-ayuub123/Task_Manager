@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import tick from "../assets/tick.png";
 import Search from "../assets/search.png";
-import 
+import { CircleCheck } from "lucide-react";
+import { Circle } from "lucide-react";
+import { List } from "lucide-react";
+
+import Tasks from "./Tasks";
+import axios from "axios";
 type User_task = {
   title: string;
   description: string;
@@ -18,8 +23,16 @@ const Dashboard = () => {
   function Toggle() {
     setToggle((prev) => !prev);
   }
+
+  async function HandlerTask() {
+    await axios.post("http://localhost:3000/Post/User_Task", {
+      ...Data,
+      date: Data.date ? Data.date.toISOString().split("T")[0] : null,
+    });
+    setData({ title: "", description: "", date: new Date() });
+  }
   return (
-    <div className=" min-h-screen animate-in fade-in-20 slide-in-from-bottom-5 duration-500 ">
+    <div className=" min-h-screen animate-in fade-in-20 slide-in-from-bottom-5 duration-500">
       {/* Header */}
       <div className="w-full  flex justify-center items-center flex-col space-y-3 p-10">
         <div className="bg-cyan-600 p-3 rounded-lg">
@@ -53,17 +66,27 @@ const Dashboard = () => {
                 type="text"
                 name=""
                 id=""
+                value={Data.title}
+                onChange={(e) => setData({ ...Data, title: e.target.value })}
                 placeholder="title Task"
                 className="w-full border-2 h-10 px-2 font-semibold rounded-sm focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 focus:outline-none"
               />
               <textarea
                 placeholder="Description"
-                className="w-full border-2  rounded-sm px-2 focus:ring focus:ring-2 focus:ring-cyan-500 focus:outline-none focus:ring-offset-2 "
                 rows={4}
                 cols={10}
+                value={Data.description}
+                onChange={(e) =>
+                  setData({ ...Data, description: e.target.value })
+                }
+                className="w-full border-2  rounded-sm px-2 focus:ring focus:ring-2 focus:ring-cyan-500 focus:outline-none focus:ring-offset-2 "
               ></textarea>
               <input
                 type="date"
+                value={Data?.date ? Data.date.toISOString().split("T")[0] : ""}
+                onChange={(e) =>
+                  setData({ ...Data, date: new Date(e.target.value) })
+                }
                 className="w-full border-2 h-11 px-2 rounded-sm focus:ring-1 ring-amber-100"
               />
               <div className="flex space-x-3  w-full">
@@ -72,6 +95,7 @@ const Dashboard = () => {
                   disabled={
                     !Data.description.trim() && !Data.title.trim() && !Data.date
                   }
+                  onClick={HandlerTask}
                 >
                   Add task
                 </button>
@@ -102,24 +126,31 @@ const Dashboard = () => {
       {/* table */}
 
       <div className="w-full flex justify-center items-center mt-5 space-x-2">
-        <div className="w-8/12 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          
-            <button className="w-full  bg-amber-50 focus:bg-cyan-500 focus:text-white  py-2 transition-all transform duration-300 hover:bg-amber-600 hover:text-white border-1 rounded-sm font-semibold">
-            <  All Task   <span className="bg-gray-200 px-1 text-gray-600 text-sm text-center  rounded-xl">0</span>
-            </button>
-    
-          
-            <button className="w-full col-span-1 py-2 gap-3 hover:text-white  focus:text-white border-1 focus:bg-cyan-500   transition-all transform duration-500 hover:bg-amber-600 rounded-sm font-semibold">
-              Active <span className="bg-gray-200 px-1 text-gray-600 text-sm text-center rounded-xl">0</span> 
-            </button>
-    
-          
-            <button className="w-full col-span-2 sm:col-span-2 md:col-span-1  py-2 px-3 space-x-3 mx-auto  hover:text-white  focus:text-white  focus:bg-cyan-500 transition-all transform duration-300 hover:bg-amber-600 border-1 rounded-sm font-semibold">
-              Complete <span className="bg-gray-200 px-1 text-gray-600 text-sm text-center  rounded-xl">0</span> 
-            </button>
-          
+        <div className="w-8/12  grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 ">
+          <button className="w-full flex justify-center items-center col-span-1    bg-amber-50 focus:bg-cyan-500 focus:text-white  py-2 transition-all transform duration-300 hover:bg-amber-600 hover:text-white border-1 rounded-sm font-semibold">
+            <List className="w-5 h-5 sm:mr-4"></List> All Task{" "}
+            <span className="bg-gray-200 px-1 ml-2 text-gray-600 text-sm text-center  rounded-xl">
+              0
+            </span>
+          </button>
+
+          <button className="w-full flex justify-center items-center col-span-1 py-2 gap-3 hover:text-white  focus:text-white border-1 focus:bg-cyan-500    transition-all transform duration-500 hover:bg-amber-600 rounded-sm font-semibold">
+            <Circle className="w-5 h-5"></Circle> Active{" "}
+            <span className="bg-gray-200 px-1 text-gray-600 text-sm text-center rounded-xl">
+              0
+            </span>
+          </button>
+
+          <button className="w-full flex justify-center items-center space-x-4 col-span-2  sm:col-span-2 md:col-span-1  py-2 px-3  mx-auto  hover:text-white  focus:text-white  focus:bg-cyan-500 transition-all transform duration-300 hover:bg-amber-600 border-1 rounded-sm font-semibold">
+            <CircleCheck className="w-f h-5"></CircleCheck> Complete{" "}
+            <span className="bg-gray-200 px-1 ml-4 text-gray-600 text-sm text-center  rounded-xl">
+              0
+            </span>
+          </button>
         </div>
       </div>
+
+      <div>{<Tasks />}</div>
     </div>
   );
 };
