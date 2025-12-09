@@ -12,6 +12,8 @@ app.use(express.json())
 app.use("/Auth", AuthRoute);
 // app.use("/api", AuthRoute);
 app.use("/Post", Task_OP);
+app.use("/Select_Task", Task_OP);
+app.use("/Update", Task_OP);
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
