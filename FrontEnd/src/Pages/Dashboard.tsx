@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import tick from "../assets/tick.png";
 import Search from "../assets/search.png";
 import { CircleCheck } from "lucide-react";
@@ -8,28 +8,44 @@ import { List } from "lucide-react";
 import Tasks from "./Tasks";
 import axios from "axios";
 type User_task = {
-  title: string;
-  description: string;
-  date?: Date;
+  Task_id?: number;
+  Task_title: string;
+  Description: string;
+  Date1: Date;
+  complete?: boolean;
 };
 const Dashboard = () => {
   const [toggle, setToggle] = useState<boolean>(false);
   const [Data, setData] = useState<User_task>({
-    title: "",
-    description: "",
-    date: new Date(),
+    Task_id:0,
+    Task_title: "",
+    Description: "",
+    Date1: new Date(),
+    complete:false
   });
+
+  
+  const [TaskList, setTasks] = useState<User_task[]>([]);
+ 
+
 
   function Toggle() {
     setToggle((prev) => !prev);
   }
-
+  async function LoadTask() {
+    const respone = await axios.get("http://localhost:3000/Post/Select_Task")
+    setTasks(respone.data)
+  }
+  useEffect(() => {
+      LoadTask()
+  } , [])
   async function HandlerTask() {
     await axios.post("http://localhost:3000/Post/User_Task", {
       ...Data,
-      date: Data.date ? Data.date.toISOString().split("T")[0] : null,
+      Date1: Data.Date1 ? Data.Date1.toISOString().split("T")[0] : null,
     });
-    setData({ title: "", description: "", date: new Date() });
+    await LoadTask()
+    setData({ Task_title: "", Description: "", Date1: new Date()  });
   }
   return (
     <div className=" min-h-screen animate-in fade-in-20 slide-in-from-bottom-5 duration-500">
@@ -48,7 +64,7 @@ const Dashboard = () => {
       </div>
       {/* Form */}
       <div className="w-full flex justify-center items-center flex-col">
-        <div className="w-8/12 flex  justify-center items-center flex-col">
+        <div className="w-11/12 md:w-8/12 sm:w-11/12 flex  justify-center items-center flex-col">
           {toggle == true ? (
             ""
           ) : (
@@ -66,8 +82,8 @@ const Dashboard = () => {
                 type="text"
                 name=""
                 id=""
-                value={Data.title}
-                onChange={(e) => setData({ ...Data, title: e.target.value })}
+                value={Data.Task_title}
+                onChange={(e) => setData({ ...Data, Task_title: e.target.value })}
                 placeholder="title Task"
                 className="w-full border-2 h-10 px-2 font-semibold rounded-sm focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 focus:outline-none"
               />
@@ -75,17 +91,17 @@ const Dashboard = () => {
                 placeholder="Description"
                 rows={4}
                 cols={10}
-                value={Data.description}
+                value={Data.Description}
                 onChange={(e) =>
-                  setData({ ...Data, description: e.target.value })
+                  setData({ ...Data, Description: e.target.value })
                 }
                 className="w-full border-2  rounded-sm px-2 focus:ring focus:ring-2 focus:ring-cyan-500 focus:outline-none focus:ring-offset-2 "
               ></textarea>
               <input
                 type="date"
-                value={Data?.date ? Data.date.toISOString().split("T")[0] : ""}
+                value={Data?.Date1 ? Data.Date1.toISOString().split("T")[0] : ""}
                 onChange={(e) =>
-                  setData({ ...Data, date: new Date(e.target.value) })
+                  setData({ ...Data, Date1: new Date(e.target.value) })
                 }
                 className="w-full border-2 h-11 px-2 rounded-sm focus:ring-1 ring-amber-100"
               />
@@ -93,7 +109,7 @@ const Dashboard = () => {
                 <button
                   className="w-11/12 h-11 rounded-md text-white font-semibold bg-cyan-600 hover:bg-amber-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
                   disabled={
-                    !Data.description.trim() && !Data.title.trim() && !Data.date
+                    !Data.Description.trim() && !Data.Task_title.trim() && !Data.Date1
                   }
                   onClick={HandlerTask}
                 >
@@ -112,7 +128,7 @@ const Dashboard = () => {
           )}
         </div>
 
-        <div className={`w-8/12 relative  ${toggle ? "mt-10" : ""}`}>
+        <div className={`w-11/12 md:w-8/12 sm:w-11/12 relative  ${toggle ? "mt-10" : ""}`}>
           <img src={Search} alt="" className="absolute top-1 left-2" />
           <input
             type="text"
@@ -124,10 +140,10 @@ const Dashboard = () => {
       </div>
 
       {/* table */}
-
-      <div className="w-full flex justify-center items-center mt-5 space-x-2">
-        <div className="w-8/12  grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 ">
-          <button className="w-full flex justify-center items-center col-span-1    bg-amber-50 focus:bg-cyan-500 focus:text-white  py-2 transition-all transform duration-300 hover:bg-amber-600 hover:text-white border-1 rounded-sm font-semibold">
+       
+      <div className=" w-full flex justify-center items-center mt-5 space-x-2">
+        <div className="  w-11/12 md:w-8/12 sm:w-11/12  grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-4 ">
+          <button className="w-full flex justify-center items-center space-x-4    bg-amber-50 focus:bg-cyan-500 focus:text-white  py-2 transition-all transform duration-300 hover:bg-amber-600 hover:text-white border-1 rounded-sm font-semibold">
             <List className="w-5 h-5 sm:mr-4"></List> All Task{" "}
             <span className="bg-gray-200 px-1 ml-2 text-gray-600 text-sm text-center  rounded-xl">
               0
@@ -150,7 +166,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div>{<Tasks />}</div>
+      <div>{<Tasks task = {TaskList}/>}</div>
     </div>
   );
 };
